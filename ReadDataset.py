@@ -30,6 +30,15 @@ def ReadGraphFile (fn) :
 
     return edges_list, weight_list, nodes_set
 
+def CreateGraph (edges) :
+
+        graph = Graph ()
+        for edge  in edges :
+            graph.add_edge (edge[0], edge[1])
+
+        return graph
+
+
 def CreateRandomGraphs (num_graphs, edges, probs) :
     graph_snapshots = []
     for i in range (num_graphs) :
