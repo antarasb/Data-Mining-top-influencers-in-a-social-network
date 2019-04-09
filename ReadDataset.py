@@ -18,13 +18,8 @@ def ReadGraphFile (fn) :
     for line in lines :
         if line[0] == "#" :
             continue
-
         node1, node2 = map(int, line[:-1].split())
         edges_list.append ([node1, node2])
-
-        # TODO: assign num parallel edges here and use it to assign a probability for each edge.
-        weight_list.append (random.random()/3)
-        # weight_list.append (1)
         nodes_set.add(node1)
         nodes_set.add(node2)
 

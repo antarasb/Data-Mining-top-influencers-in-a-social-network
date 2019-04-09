@@ -12,25 +12,30 @@ class Graph :
 
         if to not in self.edges :
             self.edges[to] = []
+            self.edges[to].append(from_)
 
-    def find_reachable_nodes (self, source_nodes) :
+    def find_reachable_nodes(self, source_nodes):
         # source nodes is a list of nodes
         reached = set([])
-        for node in source_nodes :
-            if node in self.edges :
-                self.dfs (node, reached)
-
+        for node in source_nodes:
+            if node in self.edges:
+                self.dfs(node, reached, source_nodes)
         return reached
 
-    def dfs (self, node, reached) :
-        for nbr in self.edges[node] :
-            if nbr not in reached :
-                reached.add (nbr)
-                self.dfs (nbr, reached)
+    def neighbor_nodes(self, source_node):
+        return self.edges[source_node]
 
+    def dfs(self, node, reached, source_nodes):
+        for nbr in self.edges[node]:
+            if nbr not in reached and nbr not in source_nodes:
+                reached.add(nbr)
+                self.dfs(nbr, reached, source_nodes)
     def print_graph (self) :
         for node in self.edges :
             print (node, ": ", self.edges[node])
+
+    def adjlist(self):
+        return self.edges
 
 def test () :
     G = Graph ()

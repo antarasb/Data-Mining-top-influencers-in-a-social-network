@@ -1,17 +1,39 @@
 #!/usr/local/bin/python3.6
 
-import sys, random
-from Graph import *
+# import sys, random
+# from Graph import *
 from ReadDataset import *
 from Heuristic import *
-from InfluenceUtility import *
-sys.setrecursionlimit(100000)
+from adjacencyMatrix import *
 import matplotlib.pyplot as pyplot;
 import time;
+from sklearn.cluster import SpectralClustering
+from InfluenceUtility import *
+sys.setrecursionlimit(100000)
 
 
 
 # random.seed(0)
+
+#Test function for spectral clustering
+def test():
+    edges_list, nodes_set = ReadGraphFile('facebook_combined.txt')
+    g = CreateGraph(edges_list)
+    adjacency_list = g.adjlist()
+    adjacency_matrix = create_adj_matrix(adjacency_list)
+    print(len(adjacency_matrix))
+    sc = SpectralClustering(12, affinity='precomputed', n_init=100)
+    sc.fit(adjacency_matrix)
+    y_pred = sc.labels_
+    print(y_pred)
+    cluster_points = {}
+    for index, label in enumerate(y_pred):
+        if cluster_points.get(label):
+            cluster_points[label].append(index)
+        else:
+            cluster_points[label] = [index]
+    print(cluster_points)
+
 
 def main () :
     edges_list, weight_list, nodes_set = ReadGraphFile (sys.argv[1])
