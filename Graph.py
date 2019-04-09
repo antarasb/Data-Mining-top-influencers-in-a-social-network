@@ -11,8 +11,10 @@ class Graph :
             self.edges[from_].append(to)
 
         if to not in self.edges :
-            self.edges[to] = []
+            self.edges[to] = [from_]
+        else:
             self.edges[to].append(from_)
+
 
     def find_reachable_nodes(self, source_nodes):
         # source nodes is a list of nodes
