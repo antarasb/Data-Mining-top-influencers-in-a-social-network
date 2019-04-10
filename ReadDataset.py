@@ -49,3 +49,11 @@ def CreateRandomGraphs (num_graphs, edges, probs) :
 
     return graph_snapshots
 
+def createGraphSubset(cluster, edges):
+    edge_list = []
+    weight_list = []
+    for edge in edges:
+        if edge[0] in cluster and edge[1] in cluster:
+            edge_list.append(edge)
+            weight_list.append(random.random() / 3)
+    return edge_list, weight_list

@@ -1,7 +1,7 @@
 #!/usr/local/bin/python3.6
 
-# import sys, random
-# from Graph import *
+import sys, random
+from Graph import *
 from ReadDataset import *
 from Heuristic import *
 from adjacencyMatrix import *
@@ -17,27 +17,54 @@ sys.setrecursionlimit(100000)
 
 #Test function for spectral clustering
 def test():
-    edges_list, nodes_set = ReadGraphFile('facebook_combined.txt')
+    edges_list, weightlist,  nodes_set = ReadGraphFile(sys.argv[1])
     g = CreateGraph(edges_list)
     adjacency_list = g.adjlist()
     adjacency_matrix = create_adj_matrix(adjacency_list)
-    print(len(adjacency_matrix))
-    sc = SpectralClustering(12, affinity='precomputed', n_init=100)
-    sc.fit(adjacency_matrix)
-    y_pred = sc.labels_
-    print(y_pred)
-    cluster_points = {}
-    for index, label in enumerate(y_pred):
-        if cluster_points.get(label):
-            cluster_points[label].append(index)
-        else:
-            cluster_points[label] = [index]
-    print(cluster_points)
+    # print(len(adjacency_matrix))
+    k = 101
+    k_influence = []
+    for index in range(1,k):
+        sc = SpectralClustering(k, affinity='precomputed', n_init=100)
+        sc.fit(adjacency_matrix)
+        y_pred = sc.labels_
+        # print(y_pred)
+        cluster_points = {}
+        greedyHeuristicSelectedSet = set()
+        for index, label in enumerate(y_pred):
+            if cluster_points.get(label):
+                cluster_points[label].append(index+1)
+            else:
+                cluster_points[label] = [index+1]
+        # print(cluster_points)
 
+        #max influence in each cluster:
+        total_influence = 0
+        for label, cluster in cluster_points.items():
+            edgesCluster, weightlist = createGraphSubset(cluster, edges_list)
+            step_size = 1
+            threshold = 2
+            graph_snaps = CreateRandomGraphs(50, edgesCluster, weightlist)
+            influenceMap = getInfluenceMap(set(cluster), graph_snaps, threshold)
+            greedyHeuristicSelectedSet = set()
+            # print(heuristic2(graph_snaps, set(cluster), 1, step_size, threshold, influenceMap, greedyHeuristicSelectedSet))
+            greedyHeuristicCount=len(heuristic2(graph_snaps, set(cluster), 1, step_size, threshold, influenceMap, greedyHeuristicSelectedSet))
+            # print("influence:", greedyHeuristicCount)
+            total_influence += greedyHeuristicCount
+        # print("12 clusters:",total_influence)
+        k_influence.append(total_influence)
+
+    totalNodes = [x for x in range(1, k)]
+    pyplot.plot(totalNodes, k_influence, '-r', label='Spectral Clustering')
+    pyplot.legend(loc='upper left')
+    pyplot.ylabel('Total nodes influences');
+    pyplot.xlabel('Total nodes selected');
+    pyplot.show()
+    pyplot.savefig('Sc');
 
 def main () :
     edges_list, weight_list, nodes_set = ReadGraphFile (sys.argv[1])
-    graph_snaps = CreateRandomGraphs (50, edges_list, weight_list)
+    graph_snaps = CreateRandomGraphs (10, edges_list, weight_list)
 
     # for graph in graph_snaps :
     #     print ("new graph")
@@ -58,8 +85,8 @@ def main () :
     #     print (i, nodes_list[i], len(find_influence (set([nodes_list[i]]), graph_snaps, 30)))
 
     step_size = 1;
-    threshold = 10;
-    totalNodes = range(0, 101);
+    threshold = 5
+    totalNodes = range(0, 2);
 
     #optimizedGreedyHeuristic = [];
     greedyHeuristic = [];
@@ -135,4 +162,5 @@ def main () :
     pyplot.savefig('greedy_heuristics_time');
 
 
-main ()
+# main ()
+test()

@@ -61,7 +61,10 @@ def heuristic2 (graph_snaps, nodes_set, k, step_size, threshold,influenceMap,sel
     bestNodes = set();
     maxLength = 0;
     maxNode = -1;
+    # print("selected set", selectedSet)
     for node in selectedSet:
+        if not influenceMap.get(node):
+            influenceMap[node]= set()
         bestNodes = set.union(influenceMap[node], bestNodes);
         bestNodes.add(node);
         uninfluencedNodes.discard(node);
@@ -84,6 +87,8 @@ def heuristic2 (graph_snaps, nodes_set, k, step_size, threshold,influenceMap,sel
             # print ("best nodes before", len(bestNodes))
 
     bestNodes.add(maxNode);
+    if not influenceMap.get(maxNode):
+        influenceMap[maxNode] = set()
     bestNodes = set.union(bestNodes,influenceMap[maxNode]);
     selectedSet.add(maxNode);
     selectedSet = set.union(selectedSet,influenceMap[maxNode]);
