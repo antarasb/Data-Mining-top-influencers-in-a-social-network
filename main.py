@@ -8,6 +8,9 @@ from adjacencyMatrix import *
 import matplotlib.pyplot as pyplot;
 import time;
 from sklearn.cluster import SpectralClustering
+from pagerank import *
+from spectral import *
+
 from InfluenceUtility import *
 sys.setrecursionlimit(100000)
 
@@ -16,55 +19,12 @@ sys.setrecursionlimit(100000)
 # random.seed(0)
 
 #Test function for spectral clustering
-def test():
-    edges_list, weightlist,  nodes_set = ReadGraphFile(sys.argv[1])
-    g = CreateGraph(edges_list)
-    adjacency_list = g.adjlist()
-    adjacency_matrix = create_adj_matrix(adjacency_list)
-    # print(len(adjacency_matrix))
-    k = 101
-    k_influence = []
-    for index in range(1,k):
-        sc = SpectralClustering(k, affinity='precomputed', n_init=100)
-        sc.fit(adjacency_matrix)
-        y_pred = sc.labels_
-        # print(y_pred)
-        cluster_points = {}
-        greedyHeuristicSelectedSet = set()
-        for index, label in enumerate(y_pred):
-            if cluster_points.get(label):
-                cluster_points[label].append(index+1)
-            else:
-                cluster_points[label] = [index+1]
-        # print(cluster_points)
 
-        #max influence in each cluster:
-        total_influence = 0
-        for label, cluster in cluster_points.items():
-            edgesCluster, weightlist = createGraphSubset(cluster, edges_list)
-            step_size = 1
-            threshold = 2
-            graph_snaps = CreateRandomGraphs(50, edgesCluster, weightlist)
-            influenceMap = getInfluenceMap(set(cluster), graph_snaps, threshold)
-            greedyHeuristicSelectedSet = set()
-            # print(heuristic2(graph_snaps, set(cluster), 1, step_size, threshold, influenceMap, greedyHeuristicSelectedSet))
-            greedyHeuristicCount=len(heuristic2(graph_snaps, set(cluster), 1, step_size, threshold, influenceMap, greedyHeuristicSelectedSet))
-            # print("influence:", greedyHeuristicCount)
-            total_influence += greedyHeuristicCount
-        # print("12 clusters:",total_influence)
-        k_influence.append(total_influence)
 
-    totalNodes = [x for x in range(1, k)]
-    pyplot.plot(totalNodes, k_influence, '-r', label='Spectral Clustering')
-    pyplot.legend(loc='upper left')
-    pyplot.ylabel('Total nodes influences');
-    pyplot.xlabel('Total nodes selected');
-    pyplot.show()
-    pyplot.savefig('Sc');
 
 def main () :
     edges_list, weight_list, nodes_set = ReadGraphFile (sys.argv[1])
-    graph_snaps = CreateRandomGraphs (10, edges_list, weight_list)
+    graph_snaps = CreateRandomGraphs (50, edges_list, weight_list)
 
     # for graph in graph_snaps :
     #     print ("new graph")
@@ -85,28 +45,34 @@ def main () :
     #     print (i, nodes_list[i], len(find_influence (set([nodes_list[i]]), graph_snaps, 30)))
 
     step_size = 1;
-    threshold = 5
-    totalNodes = range(0, 2);
+    threshold = 1
+    totalNodes = range(0, 11);
 
-    #optimizedGreedyHeuristic = [];
+    optimizedGreedyHeuristic = [];
     greedyHeuristic = [];
     randomHeuristic = [];
-    #optimizedGreedyHeuristic.append(0);
+    optimizedGreedyHeuristic.append(0);
     greedyHeuristic.append(0);
     randomHeuristic.append(0);
 
     # print (len(influence.find_influence(set([65687]), graph_snaps, threshold)))
     # print (len(influence.find_influence(set([44262]), graph_snaps, threshold)))
     influenceMap = getInfluenceMap(nodes_set,graph_snaps,threshold);
-    #optimizedGreedyHeuristicSelectedSet = set();
+    optimizedGreedyHeuristicSelectedSet = set();
     greedyHeuristicSelectedSet = set();
     randomHeuristicTime = [];
     randomHeuristicTime.append(0);
-    #optimizedGreedyHeuristicTime = [];
+    optimizedGreedyHeuristicTime = [];
 
-    #optimizedGreedyHeuristicTime.append(0);
+    optimizedGreedyHeuristicTime.append(0);
     greedyHeuristicTime = [];
     greedyHeuristicTime.append(0);
+
+    pageRankTime = [];
+    pageRankTime.append(0)
+
+    spectralClusteringTime = []
+    spectralClusteringTime.append(0)
 
     for k in totalNodes :
         print ("k = ", k)
@@ -120,47 +86,91 @@ def main () :
         randomHeuristic.append(randomHeuristicCount);
 
         startTime = time.time();
-        #influenceSet = heuristic1(graph_snaps, nodes_set, k, step_size, threshold,influenceMap,optimizedGreedyHeuristicSelectedSet);
-        #optimizedGreedyHeuristicTime.append(time.time() - startTime);
+        influenceSet = heuristic1(graph_snaps, nodes_set, k, step_size, threshold,influenceMap,optimizedGreedyHeuristicSelectedSet);
+
+        optimizedGreedyHeuristicTime.append(time.time() - startTime);
         # print(influenceSet);
         #print("Size of influenced set is ", len(influenceSet));
 
 
         # print ("random influenced set is ", influenceSetRandom)
-        #optimizedGreedyHeuristicCount = len(influenceSet);
+        optimizedGreedyHeuristicCount = len(influenceSet);
         startTime = time.time();
         greedyHeuristicCount = len(heuristic2(graph_snaps,nodes_set,k,step_size,threshold,influenceMap,greedyHeuristicSelectedSet));
-        greedyHeuristicTime.append(time.time() - startTime);
-        print("Size of influenced set by greedy heuristic is ", greedyHeuristicCount);
+        greedyHeuristicTime.append(time.time() - startTime)
+        # print("Size of influenced set by greedy heuristic is ", greedyHeuristicCount);
 
 
-        print ("Size of influenced set by random heuristic is ", randomHeuristicCount)
+        #print ("Size of influenced set by random heuristic is ", randomHeuristicCount)
 
-        #optimizedGreedyHeuristic.append(optimizedGreedyHeuristicCount);
+        optimizedGreedyHeuristic.append(optimizedGreedyHeuristicCount);
         greedyHeuristic.append(greedyHeuristicCount);
-        #print("Selected set for optimized greedy heuristic is ", optimizedGreedyHeuristicSelectedSet);
+        print("Selected set for optimized greedy heuristic is ", optimizedGreedyHeuristicSelectedSet);
         print("Selected set for  greedy heuristic is ", greedyHeuristicSelectedSet);
 
+    g = CreateGraph(edges_list)
+    #=================================
+    t1 = time.time()
+    dictionary = pagerank(G)
+    sorted_x = sorted(dictionary.items(), key=lambda kv: kv[1], reverse=True)
+    nodes = []
+    for index in range(0, k):
+        nodes.append(sorted_x[index][0])
+    # print(nodes)
+    visited = set()
+    influence = [0]
+    t2 = time.time()
 
-    #pyplot.plot(totalNodes, optimizedGreedyHeuristic, '-b', label='Optimized Greedy Heuristic')
+    for node in nodes:
+        startTime = time.time();
+
+        g.dfs_clustering(node, visited)
+        influence.append(len(visited))
+        pageRankTime.append(time.time() - startTime)
+    vals = [x for x in range(0, k+1)]
+    print("Page Rank Top 10", nodes[:11])
+    pyplot.plot(vals, influence, '-y', label='PageRank Algorithm')
+
+
+    # =================================
+    # closeness_dict = closeness_centrality(G)
+    # sorted_x = sorted(closeness_dict.items(), key=lambda kv: kv[1], reverse=True)
+    # nodes = []
+    # for index in range(0, k):
+    #     nodes.append(sorted_x[index][0])
+    # visited = set()
+    # influences = [0]
+    # for node in nodes:
+    #
+    #     g.dfs_clustering(node, visited)
+    #     influences.append(len(visited))
+    # pyplot.plot(vals, influences, '-m', label='Closeness centrality')
+    # #===========================================
+    # startTime = time.time()
+    sc_clustering = spectral()
+    pyplot.plot(vals, sc_clustering, '-k', label='Spectral Clustering')
+
+    print("Starting to plot graphs:")
+    pyplot.plot(totalNodes, optimizedGreedyHeuristic, '-b', label='Optimized Greedy Heuristic')
     pyplot.plot(totalNodes, greedyHeuristic, '-r', label='Greedy Heuristic')
     pyplot.plot(totalNodes, randomHeuristic, '-g', label='Random Heuristic')
 
-    pyplot.legend(loc='upper left')
-    pyplot.ylabel('Total nodes influnced');
+    pyplot.legend(loc=4)
+    pyplot.ylabel('Total nodes influenced');
     pyplot.xlabel('Total nodes selected');
     pyplot.show()
-
-   # pyplot.plot(totalNodes, optimizedGreedyHeuristicTime, '-b', label='Optimized Greedy Heuristic')
+    pyplot.savefig('zoomed')
+    pyplot.plot(totalNodes, optimizedGreedyHeuristicTime, '-b', label='Optimized Greedy Heuristic')
     pyplot.plot(totalNodes, greedyHeuristicTime, '-r', label='Greedy Heuristic')
     pyplot.plot(totalNodes, randomHeuristicTime, '-g', label='Random Heuristic')
+    # pyplot.plot(totalNodes, spectralClusteringTime, '-k', label= 'Spectral Clustering')
+    pyplot.plot(totalNodes, pageRankTime, '-y', label = 'PageRank ')
 
-    pyplot.legend(loc='upper left')
+    pyplot.legend(loc=0)
     pyplot.ylabel('Total execution time');
     pyplot.xlabel('Total nodes selected');
     pyplot.show()
     pyplot.savefig('greedy_heuristics_time');
 
-
-# main ()
-test()
+main ()
+# test()
