@@ -1,13 +1,4 @@
 import networkx as nx
-import matplotlib.pyplot as plt
-from itertools import count
-from operator import itemgetter
-from Graph import *
-from ReadDataset import *
-
-fh=open("data/facebook_combined.txt","rb")
-G=nx.read_edgelist(fh, create_using=nx.Graph(), nodetype=int, data=False)
-
 
 def pagerank(G, alpha=0.85, personalization=None,
              max_iter=100, tol=1.0e-6, nstart=None, weight='weight',
@@ -76,44 +67,3 @@ def pagerank(G, alpha=0.85, personalization=None,
         err = sum([abs(x[n] - xlast[n]) for n in x])
         if err < N * tol:
             return x
-    # raise NetworkXError('pagerank: power iteration failed to converge '
-    #                     'in %d iterations.' % max_iter)
-#
-# dictionary = pagerank(G)
-#
-#
-# # sorted_x = sorted(dictionary.items(), key=itemgetter(1), reverse=True)
-# sorted_x = sorted(dictionary.items(), key=lambda kv: kv[1], reverse=True)
-# # for node, rank in dictionary.items():
-# #     print("Node:", node, "Rank:", rank)
-# nodes = []
-# for index in range(0,5):
-#     # print("index:", index,"Val:", sorted_x[index])
-#     nodes.append(sorted_x[index][0])
-# print(nodes)
-#
-# edges_list, weightlist,  nodes_set = ReadGraphFile('data/facebook_combined.txt')
-# g = CreateGraph(edges_list)
-#
-# visited = set()
-# influence = [0]
-# for node in nodes:
-#     g.dfs_clustering(node,visited)
-#     influence.append(len(visited))
-# print(len(visited))
-#
-# vals = [x for x in range(0,6)]
-# plt.plot( vals, influence, '-g')
-# plt.show()
-
-# nx.draw(G, pos = nx.spring_layout(G))
-
-# groups = set(nx.get_node_attributes(G, 'group').values())
-# mapping = dict(zip(sorted(groups), count()))
-# nodes = G.nodes()
-# colors = [mapping.node[n]['group'] for n in nodes]
-#
-# pos = nx.spring_layout(G)
-# ec = nx.draw_networkx_edges(G, pos, alpha = 0.2)
-# mc = nx.draw_networkx_nodes(G, pos, nodelist=nodes, node_color=colors, with_labels = False, node_size=100, cmap=plt.cm.jet)
-# plt.show()
