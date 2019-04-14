@@ -23,6 +23,8 @@ sys.setrecursionlimit(100000)
 
 
 def main () :
+    fh = open(sys.argv[1], "rb")
+    G = nx.read_edgelist(fh, create_using=nx.Graph(), nodetype=int, data=False)
     edges_list, weight_list, nodes_set = ReadGraphFile (sys.argv[1])
     graph_snaps = CreateRandomGraphs (50, edges_list, weight_list)
 

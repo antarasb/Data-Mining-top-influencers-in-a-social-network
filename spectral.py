@@ -4,6 +4,7 @@ from adjacencyMatrix import *
 import time;
 from sklearn.cluster import SpectralClustering
 from pagerank import *
+from ReadDataset import *
 
 def spectral():
     edges_list, weightlist,  nodes_set = ReadGraphFile(sys.argv[1])
@@ -44,5 +45,4 @@ def spectral():
             total_influence += greedyHeuristicCount
         # print("12 clusters:",total_influence)
         k_influence.append(total_influence)
-        timer.append(time.time() - start_time)
     return k_influence
